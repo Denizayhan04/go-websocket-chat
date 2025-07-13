@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Go WebSocket Chat</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #messages { list-style-type: none; padding: 0; max-height: 300px; overflow-y: auto; border: 1px solid #ccc; margin-bottom: 10px;}
+    #messages li { padding: 5px 10px; border-bottom: 1px solid #eee; }
+    #msgInput { width: 80%; padding: 8px; }
+    button { padding: 8px 15px; }
+  </style>
+</head>
+<body>
+
+  <h2>Go WebSocket Chat</h2>
+
+  <ul id="messages"></ul>
+
+  <input id="msgInput" autocomplete="off" placeholder="Mesajınızı yazın..." />
+  <button onclick="send()">Gönder</button>
+
+  <script>
+    const socket = new WebSocket("ws://" + window.location.host + "/ws");
+
+    socket.onopen = function() {
+      console.log("Bağlantı açıldı.");
+    };
+
+    socket.onmessage = function(event) {
+      const messages = document.getElementById("messages");
+      const li = document.createElement("li");
+      li.textContent = event.data;
+      messages.appendChild(li);
+      messages.scrollTop = messages.scrollHeight; // Son mesaj görünür olsun
+    };
+
+    socket.onclose = function() {
+      console.log("Bağlantı kapandı.");
+    };
+
+    function send() {
+      const input = document.getElementById("msgInput");
+      if (input.value.trim() === "") return; // Boş mesaj gönderme
+      socket.send(JSON.stringify(input.value));
+      input.value = "";
+      input.focus();
+    }
+
+    // Enter tuşu ile gönderme
+    document.getElementById("msgInput").addEventListener("keypress", function(e) {
+      if (e.key === "Enter") {
+        send();
+      }
+    });
+  </script>
+
+</body>
+</html>
